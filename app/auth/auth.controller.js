@@ -3,11 +3,33 @@ var AuthController = AuthController || {};
 const ldap = require('../utils/ldap');
 const tokenHandler = require('./token-handler');
 
+let authUsers = require('../../users.json');
 
 AuthController.authenticate = function(email, password) {
     return new Promise( (resolve, reject) => {
+<<<<<<< HEAD
         if( !password ) return reject('Empty password');
         
+=======
+
+        let user = authUsers.users.find( u => {
+            return u.email == email;
+        })
+        if( user && user.email ) {
+            if( user.password == password ) {
+                var options = {
+                    email: email
+                }
+                
+                let tokens = tokenHandler.generateTokens(options);
+                return resolve({
+                    access_token: tokens[0],
+                    refresh_token: tokens[1]
+                }); 
+            }
+        }
+
+>>>>>>> 674dc08238e47a7f6890b9d93dcd8d1f4f5bed85
         return ldap.authenticate(email, password).then( () => {
             var options = {
                 email: email
