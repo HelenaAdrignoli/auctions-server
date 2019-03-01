@@ -22,7 +22,7 @@ module.exports = (function() {
         let refresh_token = req.body.refresh_token;
 
         let newToken = AuthController.refresh(refresh_token)
-        
+
         if( newToken == -1 ) {
             res.status(401);
             return res.send({

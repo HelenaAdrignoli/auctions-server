@@ -11,7 +11,7 @@ LDAP.authenticate = function(email, password) {
         client.bind(email, password, function(err) {
             if (err)
                 reject(err);
-            else 
+            else
                 resolve();
         });
     });

@@ -7,7 +7,7 @@ tokenHandler.generateTokens = function( payload ) {
 
     tokens[0] = tokenHandler.generateAccess(payload);
     tokens[1] = tokenHandler.generateRefresh(payload);
-    
+
     return tokens;
 }
 

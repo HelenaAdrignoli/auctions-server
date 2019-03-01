@@ -8,7 +8,7 @@ var AuctionsSchema = new mongoose.Schema({
     bid_step : { type : Number },
     status : { type : Number, required : [true, 'status is required'] },
     owner: { type : String, required : [true, 'owner is required'] },
-    expirationDate: { type: Date },
+    expiration_date: { type: Date },
     bids: [
         {
             email: { type : String },

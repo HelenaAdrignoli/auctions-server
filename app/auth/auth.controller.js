@@ -6,6 +6,8 @@ const tokenHandler = require('./token-handler');
 
 AuthController.authenticate = function(email, password) {
     return new Promise( (resolve, reject) => {
+        if( !password ) return reject('Empty password');
+        
         return ldap.authenticate(email, password).then( () => {
             var options = {
                 email: email
@@ -15,7 +17,7 @@ AuthController.authenticate = function(email, password) {
             return resolve({
                 access_token: tokens[0],
                 refresh_token: tokens[1]
-            }); 
+            });
         }).catch(reject)
     });
 }

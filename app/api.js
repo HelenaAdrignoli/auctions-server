@@ -15,6 +15,6 @@ module.exports = (function() {
 
     router.use('/v1/auth', require('./auth/auth.routes'));
     router.use('/v1/auctions', require('./auctions/auctions.routes'));
-    
+
     return router;
 })();
