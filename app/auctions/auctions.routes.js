@@ -27,13 +27,13 @@ module.exports = (function() {
     });
 
     router.get('/', function(req, res, next) {
-        let page = req.query.page;
-        let pageSize = req.query.pageSize;
-        let name = req.query.pageSize;
-        let startCreatedAt = req.query.pageSize;
-        let endCreatedAt = req.query.pageSize;
-        let status = req.query.pageSize;
-        let owner = req.query.pageSize;
+        let page = req.query.page*1;
+        let pageSize = req.query.pageSize*1;
+        let name = req.query.name;
+        let startCreatedAt = req.query.startCreatedAt;
+        let endCreatedAt = req.query.endCreatedAt;
+        let status = req.query.status;
+        let owner = req.query.owner;
 
         let filters = {
             page: page,
@@ -44,8 +44,7 @@ module.exports = (function() {
             status: status,
             owner: owner
         }
-
-
+        
         return AuctionsController.getAuctions(filters).then( auctions => {
             return res.send(auctions);
         }).catch( err => {
@@ -60,7 +59,7 @@ module.exports = (function() {
     router.post('/', function(req, res, next) {
         let payload = {
             name: req.body.name,
-            photo_url: req.body.photo_url,
+            photo: req.body.photo,
             base_price: req.body.base_price,
             bid_type : req.body.bid_type,
             bid_step : req.body.bid_step,
@@ -78,6 +77,27 @@ module.exports = (function() {
         });
     });
 
+    router.put('/:auctionId/status', function(req, res) {
+        const auctionId = req.params.auctionId;
+        
+        if( !req.body || !req.body.status || req.body.status != 1 ) {
+            res.status(400);
+            return res.send({
+                error: 'Invalid status'
+            });
+        }
+
+        return AuctionsController.activateAuction(auctionId, req.authData.email).then( auction => {
+            return res.send(auction);
+        }).catch( err => {
+            res.status(400);
+            console.log(err);
+            return res.send({
+                error: err
+            });
+        });
+    });
+    
     router.put('/:auctionId', function(req, res) {
         const auctionId = req.params.auctionId;
         const payload = {
@@ -90,6 +110,20 @@ module.exports = (function() {
         }
 
         return AuctionsController.updateAuction(auctionId, payload).then( auction => {
+            return res.send(auction);
+        }).catch( err => {
+            res.status(400);
+            console.log(err);
+            return res.send({
+                error: err
+            });
+        });
+    });
+
+    router.delete('/:auctionId', function(req, res) {
+        const auctionId = req.params.auctionId;
+        
+        return AuctionsController.deleteAuction(auctionId, req.authData.email).then( auction => {
             return res.send(auction);
         }).catch( err => {
             res.status(400);

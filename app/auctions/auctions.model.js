@@ -2,7 +2,7 @@ var mongoose = require("mongoose");
 
 var AuctionsSchema = new mongoose.Schema({
     name : { type : String, required : [true, 'name is required'] },
-    photo_url : { type : String },
+    photo : { type : String },
     base_price : { type : Number, required : [true, 'base_price is required'] },
     bid_type : { type : Number, required : [true, 'bid_type is required'] },
     bid_step : { type : Number },

@@ -7,11 +7,8 @@ let authUsers = require('../../users.json');
 
 AuthController.authenticate = function(email, password) {
     return new Promise( (resolve, reject) => {
-<<<<<<< HEAD
         if( !password ) return reject('Empty password');
         
-=======
-
         let user = authUsers.users.find( u => {
             return u.email == email;
         })
@@ -29,7 +26,6 @@ AuthController.authenticate = function(email, password) {
             }
         }
 
->>>>>>> 674dc08238e47a7f6890b9d93dcd8d1f4f5bed85
         return ldap.authenticate(email, password).then( () => {
             var options = {
                 email: email
