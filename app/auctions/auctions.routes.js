@@ -14,7 +14,6 @@ module.exports = (function() {
 
         let authData = AuthController.verify(authHeader);
 
-        console.log(authData);
         if( authData && authData != -1 ) {
             req.authData = authData;
             return next();
@@ -49,7 +48,6 @@ module.exports = (function() {
             return res.send(auctions);
         }).catch( err => {
             res.status(400);
-            console.log(err);
             return res.send({
                 error: err
             });
@@ -70,7 +68,26 @@ module.exports = (function() {
             return res.send(auctions);
         }).catch( err => {
             res.status(400);
-            console.log(err);
+            return res.send({
+                error: err
+            });
+        });
+    });
+
+    router.post('/:auctionId/bids', function(req, res) {
+        const auctionId = req.params.auctionId;
+        
+        if( !req.body || !req.body.bid_value ) {
+            res.status(400);
+            return res.send({
+                error: 'Invalid bid'
+            });
+        }
+
+        return AuctionsController.bid(auctionId, req.authData.email, req.body.bid_value).then( auction => {
+            return res.send(auction);
+        }).catch( err => {
+            res.status(400);
             return res.send({
                 error: err
             });
@@ -91,7 +108,6 @@ module.exports = (function() {
             return res.send(auction);
         }).catch( err => {
             res.status(400);
-            console.log(err);
             return res.send({
                 error: err
             });
@@ -113,7 +129,6 @@ module.exports = (function() {
             return res.send(auction);
         }).catch( err => {
             res.status(400);
-            console.log(err);
             return res.send({
                 error: err
             });
@@ -127,7 +142,6 @@ module.exports = (function() {
             return res.send(auction);
         }).catch( err => {
             res.status(400);
-            console.log(err);
             return res.send({
                 error: err
             });

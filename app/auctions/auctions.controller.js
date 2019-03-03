@@ -56,13 +56,20 @@ AuctionsController.createAuction = function(payload) {
 
     return new Promise((resolve, reject) => {
         if ( !payload.name ) return reject('Invalid name');
-        //if ( !payload.photo ) return reject('Invalid photo');
         if ( !payload.base_price ) return reject('Invalid base_price');
         if ( !payload.bid_type ) return reject('Invalid bid_type');
-        if ( payload.bid_type == 2 && !payload.bid_step ) 
-            return reject('Invalid bid_step');
-        else 
+
+        if( payload.bid_type == 1 ) 
             payload.bid_step = 0;
+
+            try {
+            payload.bid_step = Math.round(payload.bid_step);
+        } catch( e ) {
+            return reject(" Bid step must be a integer");
+        }
+
+        if ( payload.bid_type == 2 && payload.bid_step <= 0 ) 
+            return reject('Invalid bid_step');
 
         let auction = new Auctions({
             name : payload.name,
@@ -77,15 +84,13 @@ AuctionsController.createAuction = function(payload) {
 
         return auction.save()
             .then(result => {
-				console.log('result', result)
 
 				return resolve({
 					createdAuction: auction
 				});
 			})
 			.catch( err => {
-				console.log(err)
-				reject('err', err);
+				reject(err);
 			})
     })
 }
@@ -95,7 +100,6 @@ AuctionsController.updateAuction = function(auctionId, payload) {
 
     return new Promise((resolve, reject) => {
         if ( !payload.name ) return reject('Invalid name');
-        //if ( !payload.photo_url ) return reject('Invalid photo');
         if ( !payload.base_price ) return reject('Invalid base_price');
         if ( !payload.bid_type ) return reject('Invalid bid_type');
         if ( payload.bid_type == 2 && !payload.bid_step ) 
@@ -125,16 +129,97 @@ AuctionsController.updateAuction = function(auctionId, payload) {
                     
                     return auction.save()
                         .then(result => {
-                            console.log('result', result);
-
                             return resolve({
                                 updatedAuction: auction
                             })
                         })
                         .catch(err => {
-                            console.log(err);
                             reject('err', err);
                         });
+                }
+            });
+    })
+}
+
+AuctionsController.bid = function(auctionId, owner, bidValue) {
+    let Auctions = require('./auctions.model');
+    let moment = require('moment');
+
+    return new Promise((resolve, reject) => {
+        let query = Auctions.findById(auctionId);
+
+        try {
+            bidValue = parseInt(bidValue);
+        } catch(e) {
+            return reject("Only integer bids accepted");
+        }
+
+        return query.exec()
+            .then(auction => {
+                if (auction === null) {
+                    return reject('Auction not found')
+                } else {
+
+                    if( auction.status != 1 ) 
+                        return reject('This auction is not active!');
+
+                    if( (new Date()) > auction.expiration_date )
+                        return reject('This auction is already closed!');
+
+                    if( owner == auction.owner ) 
+                        return reject('Trying to bid on your own auction?! ¬¬');
+                    
+                    let newBid = {
+                        "email": owner,
+                        "value": bidValue,
+                        "timestamp": (new Date())
+                    }
+                    let lastBid = null;
+                    if( auction.bids && auction.bids.length > 0 ) {
+                        for( let i = 0; i < auction.bids.length; i++ ) {
+                            if( !lastBid ) {
+                                lastBid = auction.bids[i];
+                            } else {
+                                if( auction.bids[i].timestamp > lastBid.timestamp ) {
+                                    lastBid = auction.bids[i];
+                                }
+                            }
+                        }
+                    } 
+
+                    // Lance pode ser livre ou fixado
+                    // Se for livre, só precise ser maior que o anterior
+                    let invalidBid = null;
+                    if( auction.bid_type == 1 ) {
+                        // Lance livre
+                        if( lastBid != null && lastBid.value >= newBid.value ) {
+                            invalidBid = 'New bid must be greater than last bid!';
+                        }
+                    } else {
+                        // Lance fixado
+                        if( lastBid != null && newBid.value != ( lastBid.value + auction.bid_step ) ) {
+                            invalidBid = 'New bid must adhere to fixed auction rules!';
+                        }
+
+                        if( lastBid == null && newBid.value != auction.bid_step ) {
+                            invalidBid = 'New bid must be at least the bid step value!';
+                        }
+                    }
+
+                    if( invalidBid == null ) {
+                        auction.bids.push(newBid);
+                        return auction.save()
+                        .then(result => {
+                            return resolve({
+                                updatedAuction: auction
+                            })
+                        })
+                        .catch(err => {
+                            reject('err', err);
+                        });
+                    } else {
+                        reject(invalidBid);
+                    }
                 }
             });
     })
@@ -200,7 +285,6 @@ AuctionsController.deleteAuction = function(auctionId, owner) {
                             return resolve('Good while it lasted')
                         })
                         .catch(err => {
-                            console.log(err);
                             reject('err', err);
                         });
                 }

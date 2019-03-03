@@ -53,7 +53,6 @@ tokenHandler.generateAccessWithRefresh = function( token ) {
 }
 
 tokenHandler.validate = function(token) {
-    console.log("Token validate");
     if( token == undefined || token == "" ) {
         return -1;
     } else {
@@ -62,11 +61,8 @@ tokenHandler.validate = function(token) {
             clockTolerance : 2,
             ignoreExpiration: false
         }
-        console.log("optons");
         let retorno = jwt.verify(token, process.env.MASTER_KEY, options);
 
-        console.log('retorno');
-        console.log(retorno);
         if( retorno.type != 'a' )
             return -1;
         

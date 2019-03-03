@@ -52,7 +52,6 @@ AuthController.verify = function( authorization ) {
 
         return tokenHandler.validate(authParts[1]);
     } catch( e ) {
-        console.log(e);
         return false;
     }
 }

@@ -10,7 +10,6 @@ module.exports = (function() {
             return res.send(result);
         }).catch( err => {
             res.status(401);
-            console.log(err);
             res.send({
                 "error": "Unauthorized",
                 "errorMessage": "Invalid user or password"
